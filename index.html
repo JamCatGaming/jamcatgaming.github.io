@@ -58,7 +58,6 @@
 <body>
 
     <div id="game-container">
-        <!-- ... (вся разметка без изменений) ... -->
         <div class="lane-container">
             <div class="lane"> <div class="target-line"></div> <div class="key-indicator">⬅️</div></div>
             <div class="lane"> <div class="target-line"></div> <div class="key-indicator">⬇️</div></div>
@@ -101,117 +100,71 @@
         // --> ВСТАВЬТЕ СВОИ ДАННЫЕ ИЗ SUPABASE СЮДА <--
        const SUPABASE_URL = 'https://kefcmxtlllmatffumhyc.supabase.co'; // Например: 'https://xxxxxxxx.supabase.co'
        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNteHRsbGxtYXRmZnVtaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NDQyMjYsImV4cCI6MjA1ODQyMDIyNn0.W22ul6CQOM4R4bp8x16bnK3NcdXkFKTP8K_Y6a1Bzdo'; // Длинный ключ anon public
-
-        let supabaseClient; // Переименовал, чтобы не конфликтовать с глобальной переменной supabase
+        
+        let supabaseClient;
         let currentUser;
-
         let score, combo, lives, hasShield, feverMeter, isFeverTime, highScore;
         let noteSpeed, noteSpawnInterval;
         let gameIsActive = false, noteSpawner = null, animationFrameId = null, feverParticleSpawner = null;
         const FEVER_MAX = 100, KEY_MAP = { 'ArrowLeft': 0, 'ArrowDown': 1, 'ArrowRight': 2 };
         const items = { food: [ {e: '🐟'}, {e: '🍗'}, {e: '🥩'} ], junk: [ {e: '👢'}, {e: '🧱'}, {e: '🌵'} ], powerup: [ {e: '🛡️', type: 'shield'}, {e: '❤️', type: 'heart'} ], special: [ {e: '✨🐟', type: 'goldfish'} ] };
-
-        // --- Supabase Interaction ---
+        
+        // --- Database Interaction Logic ---
         async function fetchUserHighScore() {
             if (!supabaseClient || !currentUser) {
                 highScore = 0;
                 highScoreDisplay.textContent = `High Score: 0`;
                 return;
             }
-
             try {
                 highScoreDisplay.textContent = 'Loading score...';
-                let { data, error } = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('scores')
                     .select('high_score')
-                    .eq('telegram_id', currentUser.id)
-                    .single();
+                    .eq('telegram_id', currentUser.id);
 
-                if (error && error.code === 'PGRST116') { // Ошибка 'PGRST116' означает, что строка не найдена
-                    console.log('New user detected. Creating profile...');
-                    highScore = 0;
-
-                    const { error: insertError } = await supabaseClient.from('scores').insert({
-                        telegram_id: currentUser.id,
-                        username: currentUser.username,
-                        high_score: 0
-                    });
-
-                    if (insertError) throw insertError;
-
-                } else if (error) {
-                    throw error; // Выбрасываем любую другую ошибку
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    highScore = Math.max(...data.map(item => item.high_score));
                 } else {
-                    highScore = data.high_score; // Пользователь найден, берем его счет
+                    highScore = 0;
                 }
-
                 highScoreDisplay.textContent = `High Score: ${highScore}`;
-
             } catch (error) {
-                console.error('Error during user initialization/fetching score:', error);
+                console.error('Error fetching high score:', error);
                 highScore = 0;
                 highScoreDisplay.textContent = 'Could not load score';
             }
         }
-
-        async function saveUserHighScore() {
-            if (!supabaseClient || !currentUser) return;
+        
+        async function saveGameResult() {
+            if (!supabaseClient || !currentUser || score <= 0) return;
             try {
-                // Upsert здесь по-прежнему идеален, так как он обновит существующую запись.
                 const { error } = await supabaseClient
                     .from('scores')
-                    .upsert({
-                        telegram_id: currentUser.id,
+                    .insert({ 
+                        telegram_id: currentUser.id, 
                         username: currentUser.username,
-                        high_score: highScore
-                    }, { onConflict: 'telegram_id' });
+                        high_score: score
+                    });
                 if (error) throw error;
-                console.log('High score saved successfully!');
+                console.log(`Game result ${score} saved successfully!`);
             } catch (error) {
-                console.error('Error saving high score:', error);
+                console.error('Error saving game result:', error);
             }
         }
-
-        // --- EVENT LISTENERS AND INITIALIZATION ---
-        window.addEventListener('load', () => {
-            // Инициализируем Supabase, как вы и предложили
-            if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-                const { createClient } = supabase; // Деструктуризация из глобального объекта supabase
-                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } else {
-                console.error("Supabase credentials are not set!");
-                document.getElementById('high-score-display').textContent = 'Error: DB not configured.';
-            }
-
-            // Вся остальная логика инициализации
-            tg.ready();
-            tg.expand();
-
-            currentUser = tg.initDataUnsafe?.user;
-
-            if (!currentUser) {
-                console.warn("Not running in Telegram. Using mock user for testing.");
-                currentUser = { id: 12345, username: 'testuser', first_name: 'Test' };
-                document.getElementById('start-screen').querySelector('p').innerHTML += '<br><b style="color:yellow;">Running in test mode.</b>';
-            }
-
-            fetchUserHighScore();
-        });
-
-        startButton.addEventListener('click', startGame);
-        document.addEventListener('keydown', handleKeyPress);
-
-        // --- (Остальные игровые функции без изменений) ---
-        // ... (весь код функций startGame, gameLoop, createNote, endGame и т.д. остается здесь) ...
+        
+        // --- Game Flow ---
         async function endGame() {
             gameIsActive = false;
             clearInterval(noteSpawner);
             cancelAnimationFrame(animationFrameId);
             if (isFeverTime) endFeverTime(true);
 
+            await saveGameResult(); 
+
             if (score > highScore) {
                 highScore = score;
-                await saveUserHighScore();
             }
 
             startScreen.style.display = 'flex';
@@ -220,8 +173,30 @@
             startButton.textContent = 'Play Again';
             highScoreDisplay.textContent = `High Score: ${highScore}`;
         }
+        
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+                const { createClient } = supabase;
+                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error("Supabase credentials are not set!");
+                document.getElementById('high-score-display').textContent = 'Error: DB not configured.';
+            }
+            tg.ready();
+            tg.expand();
+            currentUser = tg.initDataUnsafe?.user;
+            if (!currentUser) {
+                currentUser = { id: 12345, username: 'testuser' };
+                document.getElementById('start-screen').querySelector('p').innerHTML += '<br><b style="color:yellow;">Running in test mode.</b>';
+            }
+            fetchUserHighScore();
+        });
 
-        // --- Копипаст неизмененных функций для полноты ---
+        startButton.addEventListener('click', startGame);
+        document.addEventListener('keydown', handleKeyPress);
+        
+        // --- Core Game Functions (Unchanged) ---
         function startGame() {
             score = 0; combo = 1; lives = 3; hasShield = false;
             noteSpeed = 3.5; noteSpawnInterval = 1200;
