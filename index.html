@@ -89,8 +89,9 @@
 
         // --- Config & State Variables ---
         const tg = window.Telegram.WebApp;
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+       const SUPABASE_URL = 'https://kefcmxtlllmatffumhyc.supabase.co'; // Например: 'https://xxxxxxxx.supabase.co'
+       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNteHRsbGxtYXRmZnVtaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NDQyMjYsImV4cCI6MjA1ODQyMDIyNn0.W22ul6CQOM4R4bp8x16bnK3NcdXkFKTP8K_Y6a1Bzdo'; // Длинный ключ anon public
+
         let supabaseClient, currentUser, score, combo, lives, hasShield, feverMeter, isFeverTime, highScore;
         let noteSpeed, noteSpawnInterval;
         let gameIsActive = false, noteSpawner = null, animationFrameId = null, feverParticleSpawner = null;
