@@ -154,7 +154,9 @@
         // NEW: Function to handle touch events
         function handleTouchStart(e) {
             e.preventDefault(); // Prevents zoom/scroll on mobile
-            if (!gameIsActive) return;
+            if (!gameIsActive)  {
+                return startGame();
+            };
 
             const touch = e.touches[0];
             const tappedElement = document.elementFromPoint(touch.clientX, touch.clientY);
