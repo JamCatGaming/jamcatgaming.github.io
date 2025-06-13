@@ -10,13 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #483D8B; /* DarkSlateBlue */
-            --container-bg: #E6E6FA; /* Lavender */
-            --primary-accent: #9370DB; /* MediumPurple */
-            --hit-zone-color: #00FA9A; /* MediumSpringGreen */
-            --perfect-zone-color: #00BFFF; /* DeepSkyBlue */
-            --fever-glow: #FFD700; /* Gold */
-            --danger-color: #FF6347; /* Tomato */
+            --bg-color: #483D8B;
+            --container-bg: #E6E6FA;
+            --primary-accent: #9370DB;
+            --hit-zone-color: #00FA9A;
+            --perfect-zone-color: #00BFFF;
+            --fever-glow: #FFD700;
+            --danger-color: #FF6347;
             --text-color: #333;
         }
         body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: var(--bg-color); font-family: 'Arial', 'Helvetica Neue', sans-serif; overflow: hidden; user-select: none; }
@@ -55,7 +55,7 @@
         #leaderboard li { display: flex; justify-content: space-between; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 5px; margin-bottom: 5px; font-size: 1.1em; }
         #start-button { padding: 15px 30px; font-size: 1.5em; border-radius: 10px; border: none; cursor: pointer; background-color: var(--danger-color); color: white; font-weight: bold; margin-top: 20px; transition: background-color 0.2s; }
         #start-button:hover { background-color: #e55337; }
-        .floating-text { position: absolute; pointer-events: none; z-index: 30; font-size: 22px; font-weight: bold; animation: float-up 1s ease-out forwards; text-align: center; white-space: pre-wrap; /* Allows \n to work */ line-height: 1.1; }
+        .floating-text { position: absolute; pointer-events: none; z-index: 30; font-size: 22px; font-weight: bold; animation: float-up 1s ease-out forwards; text-align: center; white-space: pre-wrap; line-height: 1.1; }
         @keyframes float-up { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-60px); } }
         .particle { position: absolute; pointer-events: none; z-index: 30; color: var(--fever-glow); text-shadow: 0 0 5px white; }
     </style>
@@ -67,7 +67,7 @@
         <img id="cat" src="https://coin-images.coingecko.com/coins/images/51446/large/jamcat.jpg?1731602538" alt="Cute Cat">
         <div id="ui"> <span id="score"></span><span id="combo"></span> <div id="lives-container"><span id="lives"></span><span id="shield-icon">🛡️</span></div> </div>
         <div id="fever-bar-container"><div id="fever-bar"></div></div>
-        <div id="start-screen"> <h1>Jam Cat Beat</h1> <p>Use <b>⬅️ ⬇️ ➡️</b> to catch falling items.<br> Avoid the 💣 bombs! Aim for <b>PERFECT</b> hits!</p> <div id="high-score-display">High Score: ...</div> <p id="final-score" style="display:none;"></p> <div id="leaderboard"> <h2>Leaderboard</h2> <ol id="leaderboard-list"></ol> </div> <button id="start-button">Start Game</button> </div>
+        <div id="start-screen"> <h1>Jam Cat Beat</h1> <p>Use <b>⬅️ ⬇️ ➡️</b> or <b>Tap</b> the lanes.<br> Avoid 💣! Aim for <b>PERFECT</b> hits!</p> <div id="high-score-display">High Score: ...</div> <p id="final-score" style="display:none;"></p> <div id="leaderboard"> <h2>Leaderboard</h2> <ol id="leaderboard-list"></ol> </div> <button id="start-button">Start Game</button> </div>
     </div>
 
     <script>
@@ -89,125 +89,16 @@
 
         // --- Config & State Variables ---
         const tg = window.Telegram.WebApp;
-       const SUPABASE_URL = 'https://kefcmxtlllmatffumhyc.supabase.co'; // Например: 'https://xxxxxxxx.supabase.co'
-       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNteHRsbGxtYXRmZnVtaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NDQyMjYsImV4cCI6MjA1ODQyMDIyNn0.W22ul6CQOM4R4bp8x16bnK3NcdXkFKTP8K_Y6a1Bzdo'; // Длинный ключ anon public
-
+        const SUPABASE_URL = 'https://kefcmxtlllmatffumhyc.supabase.co'; // Например: 'https://xxxxxxxx.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNteHRsbGxtYXRmZnVtaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NDQyMjYsImV4cCI6MjA1ODQyMDIyNn0.W22ul6CQOM4R4bp8x16bnK3NcdXkFKTP8K_Y6a1Bzdo'; // Длинный ключ anon public
         let supabaseClient, currentUser, score, combo, lives, hasShield, feverMeter, isFeverTime, highScore;
         let noteSpeed, noteSpawnInterval;
         let gameIsActive = false, noteSpawner = null, animationFrameId = null, feverParticleSpawner = null;
-        const FEVER_MAX = 100, KEY_MAP = { 'ArrowLeft': 0, 'ArrowDown': 1, 'ArrowRight': 2 };
+        const FEVER_MAX = 100;
+        const KEY_MAP = { 'ArrowLeft': 0, 'ArrowDown': 1, 'ArrowRight': 2 };
         const items = { food: [{e: '🐟'}, {e: '🍗'}, {e: '🥩'}], junk: [{e: '👢'}, {e: '🧱'}, {e: '🌵'}], powerup: [{e: '🛡️', type: 'shield'}, {e: '❤️', type: 'heart'}], special: [{e: '✨🐟', type: 'goldfish'}], danger: [{e: '💣', type: 'bomb'}] };
 
-        // --- Sound Effects (Placeholder) ---
-        function playSound(soundName) {
-            // Чтобы добавить звук, раскомментируйте и настройте этот блок
-            /*
-            try {
-                const audio = new Audio(`./sounds/${soundName}.mp3`);
-                audio.play();
-            } catch (e) {
-                console.warn(`Could not play sound: ${soundName}`, e);
-            }
-            */
-        }
-
-        // --- Database Interaction ---
-        async function fetchUserHighScore() {
-            if (!supabaseClient || !currentUser) {
-                highScore = 0;
-                highScoreDisplay.textContent = `High Score: 0`;
-                return;
-            }
-            try {
-                highScoreDisplay.textContent = 'Loading...';
-                const { data, error } = await supabaseClient.rpc('get_my_high_score', { p_telegram_id: currentUser.id });
-                if (error) throw error;
-                highScore = data;
-                highScoreDisplay.textContent = `High Score: ${highScore}`;
-            } catch (error) {
-                console.error('Error fetching high score via RPC:', error);
-                highScore = 0;
-                highScoreDisplay.textContent = 'Could not load score';
-            }
-        }
-
-        async function fetchLeaderboard() {
-            if (!supabaseClient) return;
-            leaderboardList.innerHTML = '<li>Loading...</li>';
-            try {
-                const { data, error } = await supabaseClient.rpc('get_leaderboard');
-                if (error) throw error;
-                leaderboardList.innerHTML = '';
-                if (data.length === 0) {
-                    leaderboardList.innerHTML = '<li>Play to be the first!</li>';
-                } else {
-                    data.forEach((player, index) => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<span>${index + 1}. ${player.username || 'Anon'}</span><span>${player.high_score}</span>`;
-                        leaderboardList.appendChild(li);
-                    });
-                }
-            } catch (error) {
-                console.error('Error fetching leaderboard:', error);
-                leaderboardList.innerHTML = '<li>Could not load board</li>';
-            }
-        }
-
-        async function saveGameResult() {
-            if (!supabaseClient || !currentUser || score <= 0) return;
-            try {
-                const { error } = await supabaseClient.from('scores').insert({
-                    telegram_id: currentUser.id,
-                    username: currentUser.username,
-                    high_score: score
-                });
-                if (error) throw error;
-                console.log(`Game result ${score} saved successfully!`);
-            } catch (error) {
-                console.error('Error saving game result:', error);
-            }
-        }
-
-        // --- Game Flow ---
-        function startGame() {
-            score = 0; combo = 1; lives = 3; hasShield = false;
-            noteSpeed = 3.5; noteSpawnInterval = 1200;
-            feverMeter = 0; isFeverTime = false;
-            gameIsActive = true;
-            updateUI();
-            startScreen.style.display = 'none';
-            document.querySelectorAll('.note, .particle').forEach(n => n.remove());
-            noteSpawner = setInterval(createNote, noteSpawnInterval);
-            gameLoop();
-        }
-
-        function gameLoop() {
-            if (!gameIsActive) return;
-            updateKeyIndicators();
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
-
-        async function endGame() {
-            gameIsActive = false;
-            clearInterval(noteSpawner);
-            cancelAnimationFrame(animationFrameId);
-            if (isFeverTime) endFeverTime(true);
-
-            await saveGameResult();
-
-            if (score > highScore) {
-                highScore = score;
-            }
-
-            startScreen.style.display = 'flex';
-            finalScoreDisplay.textContent = `Your final score: ${score}`;
-            finalScoreDisplay.style.display = 'block';
-            startButton.textContent = 'Play Again';
-            highScoreDisplay.textContent = `High Score: ${highScore}`;
-            
-            fetchLeaderboard();
-        }
-// --- Player Actions & Consequences ---
+        // --- Player Actions & Consequences ---
         function handleKeyPress(e) {
             if (!gameIsActive || !KEY_MAP.hasOwnProperty(e.key)) return;
             
@@ -221,9 +112,8 @@
             let noteHit = null;
             let accuracy = 'miss';
 
-            // Ищем ноту в нажатой дорожке
             lanes[laneIndex].querySelectorAll('.note').forEach(note => {
-                if (noteHit) return; // Уже нашли одну, выходим
+                if (noteHit) return;
                 const noteRect = note.getBoundingClientRect();
                 const noteCenterY = noteRect.top + noteRect.height / 2;
                 
@@ -240,12 +130,12 @@
             setTimeout(() => keyIndicators[laneIndex].classList.remove('pressed'), 100);
 
             if (noteHit) {
-                // Если нота найдена, обрабатываем ее
                 const type = noteHit.dataset.type;
+                const basePoints = type === 'goldfish' ? 250 : 20;
+                const feverGain = type === 'goldfish' ? 30 : 10;
+                
                 switch(type) {
                     case 'food': case 'goldfish':
-                        const basePoints = type === 'goldfish' ? 250 : 20;
-                        const feverGain = type === 'goldfish' ? 30 : 10;
                         handleHit(accuracy, basePoints, feverGain, targetLine);
                         break;
                     case 'junk': case 'bomb':
@@ -257,16 +147,36 @@
                 }
                 noteHit.remove();
             } else {
-                // Если нота НЕ найдена в нажатой дорожке (промах по пустоте)
                 handleMiss(targetLine);
             }
         }
 
+        // NEW: Function to handle touch events
+        function handleTouchStart(e) {
+            e.preventDefault(); // Prevents zoom/scroll on mobile
+            if (!gameIsActive) return;
+
+            const touch = e.touches[0];
+            const tappedElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (!tappedElement) return;
+
+            const tappedLane = tappedElement.closest('.lane');
+            if (tappedLane) {
+                const laneIndex = Array.from(lanes).indexOf(tappedLane);
+                if (laneIndex !== -1) {
+                    const key = Object.keys(KEY_MAP).find(k => KEY_MAP[k] === laneIndex);
+                    if (key) {
+                        handleKeyPress({ key: key });
+                    }
+                }
+            }
+        }
+
         function handleHit(accuracy, basePoints, feverGain, targetElement) {
-            let scoreMultiplier = combo * (isFeverTime ? 3 : 1);
-            let pointMultiplier = (accuracy === 'perfect') ? 2 : 1;
-            
+            const scoreMultiplier = combo * (isFeverTime ? 3 : 1);
+            const pointMultiplier = accuracy === 'perfect' ? 2 : 1;
             const finalPoints = Math.round(basePoints * pointMultiplier * scoreMultiplier);
+            
             score += finalPoints;
             combo++;
             
@@ -279,7 +189,6 @@
             
             cat.classList.remove('sad', 'happy'); void cat.offsetWidth; cat.classList.add('happy');
             
-            // ИСПРАВЛЕНО: Отображаем и оценку, и очки
             const accuracyText = accuracy.toUpperCase() + '!';
             const pointsText = `+${finalPoints}`;
             createFloatingText(`${accuracyText}\n${pointsText}`, targetElement, accuracy === 'perfect' ? '#00BFFF' : '#27ae60');
@@ -290,31 +199,33 @@
         }
 
         function handleMiss(targetElement) {
-            playSound('miss');
             if (hasShield) {
                 hasShield = false;
-                combo = Math.max(1, Math.floor(combo / 2));
+                combo = 1; // Shield saves you but resets combo
                 createFloatingText('SHIELD SAVED!', targetElement || lanes[1].querySelector('.target-line'), '#3498db');
+                playSound('shield');
                 updateUI();
                 return;
             }
-            if (lives <= 0) return; // Не отнимать жизни, если они уже кончились
+            if (lives <= 0 || !gameIsActive) return;
 
             lives--;
             combo = 1;
+            playSound('miss');
             if (isFeverTime) endFeverTime();
             cat.classList.remove('happy', 'sad'); void cat.offsetWidth; cat.classList.add('sad');
             gameContainer.classList.add('shake');
             setTimeout(() => gameContainer.classList.remove('shake'), 300);
             createFloatingText('MISS', targetElement || lanes[1].querySelector('.target-line'), '#e74c3c');
             
+            updateUI();
+
             if (lives <= 0) {
-                gameIsActive = false; // Немедленно останавливаем игру
+                gameIsActive = false;
                 setTimeout(endGame, 500);
             }
-            updateUI();
         }
-
+        
         function createNote() {
             if (!gameIsActive) return;
             const item = getItem();
@@ -325,11 +236,13 @@
             note.dataset.type = item.type;
             note.style.animationDuration = `${noteSpeed}s`;
             
-            // ИСПРАВЛЕНО: Упрощенная логика. Наказываем, только если хороший объект долетел до конца.
             note.addEventListener('animationend', () => {
                 note.remove();
-                if (gameIsActive && (item.type === 'food' || item.type === 'goldfish' || item.type === 'powerup')) {
-                    handleMiss(null); // Пропуск хорошей ноты = промах
+                if (gameIsActive) {
+                    const isGoodNote = ['food', 'goldfish', 'shield', 'heart'].includes(item.type);
+                    if (isGoodNote) {
+                        handleMiss(null); // Пропуск хорошей ноты = промах
+                    }
                 }
             });
             lanes[laneIndex].appendChild(note);
@@ -342,14 +255,12 @@
                 supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             } else {
                 console.error("Supabase credentials are not set!");
-                document.getElementById('high-score-display').textContent = 'Error: DB not configured.';
             }
             tg.ready();
             tg.expand();
             currentUser = tg.initDataUnsafe?.user;
             if (!currentUser) {
                 currentUser = { id: 12345, username: 'testuser' };
-                document.getElementById('start-screen').querySelector('p').innerHTML += '<br><b style="color:yellow;">Running in test mode.</b>';
             }
             fetchUserHighScore();
             fetchLeaderboard();
@@ -357,25 +268,27 @@
 
         startButton.addEventListener('click', startGame);
         document.addEventListener('keydown', handleKeyPress);
+        // NEW: Add touch listener
+        gameContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
 
-        // --- Полные тела остальных функций для копирования ---
-        playSound = function(soundName) { /* Placeholder */ };
-        fetchUserHighScore = async function() { if (!supabaseClient || !currentUser) { highScore = 0; highScoreDisplay.textContent = `High Score: 0`; return; } try { highScoreDisplay.textContent = 'Loading...'; const { data, error } = await supabaseClient.rpc('get_my_high_score', { p_telegram_id: currentUser.id }); if (error) throw error; highScore = data; highScoreDisplay.textContent = `High Score: ${highScore}`; } catch (error) { console.error('Error fetching high score via RPC:', error); highScore = 0; highScoreDisplay.textContent = 'Could not load score'; } };
-        fetchLeaderboard = async function() { if (!supabaseClient) return; leaderboardList.innerHTML = '<li>Loading...</li>'; try { const { data, error } = await supabaseClient.rpc('get_leaderboard'); if (error) throw error; leaderboardList.innerHTML = ''; if (data.length === 0) { leaderboardList.innerHTML = '<li>Play to be the first!</li>'; } else { data.forEach((player, index) => { const li = document.createElement('li'); li.innerHTML = `<span>${index + 1}. ${player.username || 'Anon'}</span><span>${player.high_score}</span>`; leaderboardList.appendChild(li); }); } } catch (error) { console.error('Error fetching leaderboard:', error); leaderboardList.innerHTML = '<li>Could not load board</li>'; } };
-        saveGameResult = async function() { if (!supabaseClient || !currentUser || score <= 0) return; try { const { error } = await supabaseClient.from('scores').insert({ telegram_id: currentUser.id, username: currentUser.username, high_score: score }); if (error) throw error; console.log(`Game result ${score} saved successfully!`); } catch (error) { console.error('Error saving game result:', error); } };
-        startGame = function() { score = 0; combo = 1; lives = 3; hasShield = false; noteSpeed = 3.5; noteSpawnInterval = 1200; feverMeter = 0; isFeverTime = false; gameIsActive = true; updateUI(); startScreen.style.display = 'none'; document.querySelectorAll('.note, .particle').forEach(n => n.remove()); noteSpawner = setInterval(createNote, noteSpawnInterval); gameLoop(); };
-        gameLoop = function() { if (!gameIsActive) return; updateKeyIndicators(); animationFrameId = requestAnimationFrame(gameLoop); };
-        endGame = async function() { gameIsActive = false; clearInterval(noteSpawner); cancelAnimationFrame(animationFrameId); if (isFeverTime) endFeverTime(true); await saveGameResult(); if (score > highScore) { highScore = score; } startScreen.style.display = 'flex'; finalScoreDisplay.textContent = `Your final score: ${score}`; finalScoreDisplay.style.display = 'block'; startButton.textContent = 'Play Again'; highScoreDisplay.textContent = `High Score: ${highScore}`; fetchLeaderboard(); };
-        getItem = function() { const rand = Math.random() * 100; if (isFeverTime) { if (rand < 80) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 95) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; return { ...items.special[0] }; } if (rand < 50) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 75) return { ...items.junk[Math.floor(Math.random()*items.junk.length)], type: 'junk' }; if (rand < 88) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; if (rand < 98) return { ...items.special[0] }; return { ...items.danger[0] }; };
-        activatePowerup = function(type, targetElement) { let text = ''; switch(type) { case 'shield': text = 'SHIELD UP!'; hasShield = true; playSound('powerup'); break; case 'heart': if (lives < 5) { text = '+1 LIFE!'; lives++; playSound('powerup'); } break; } if (text) createFloatingText(text, targetElement, '#3498db'); updateUI(); };
-        updateFeverMeter = function(amount) { if (isFeverTime) return; feverMeter = Math.min(FEVER_MAX, feverMeter + amount); if (feverMeter === FEVER_MAX) activateFeverTime(); updateUI(); };
-        activateFeverTime = function() { isFeverTime = true; playSound('fever'); gameContainer.classList.add('fever-time'); feverParticleSpawner = setInterval(createFeverParticle, 150); feverBar.classList.add('depleting'); feverBar.style.width = '100%'; requestAnimationFrame(() => { feverBar.style.width = '0%'; }); setTimeout(endFeverTime, 10000); };
-        endFeverTime = function(force = false) { if (!isFeverTime && !force) return; isFeverTime = false; feverMeter = 0; gameContainer.classList.remove('fever-time'); clearInterval(feverParticleSpawner); feverBar.classList.remove('depleting'); updateUI(); };
-        updateKeyIndicators = function() { const hittableLanes = [false, false, false]; document.querySelectorAll('.note').forEach(note => { const laneIndex = parseInt(note.dataset.lane, 10); const targetLine = lanes[laneIndex].querySelector('.target-line'); const noteRect = note.getBoundingClientRect(); const targetRect = targetLine.getBoundingClientRect(); if (noteRect.bottom > targetRect.top && noteRect.top < targetRect.bottom) { hittableLanes[laneIndex] = true; } }); keyIndicators.forEach((indicator, index) => { indicator.classList.toggle('hittable', hittableLanes[index]); }); };
-        updateUI = function() { scoreDisplay.textContent = `🏆 ${score}`; comboDisplay.textContent = `🔥 x${combo}`; livesDisplay.textContent = '❤️'.repeat(lives); shieldIcon.classList.toggle('active', hasShield); if (!isFeverTime) { feverBar.style.width = `${(feverMeter / FEVER_MAX) * 100}%`; } };
-        createFloatingText = function(text, element, color) { const el = document.createElement('div'); el.className = 'floating-text'; el.textContent = text; el.style.color = color; const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect(); el.style.left = `${rect.left - containerRect.left + rect.width / 2 - 30}px`; el.style.top = `${rect.top - containerRect.top}px`; gameContainer.appendChild(el); setTimeout(() => el.remove(), 1000); };
-        createHitParticles = function(count, element) { const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect(); const startX = rect.left - containerRect.left + rect.width / 2; const startY = rect.top - containerRect.top + rect.height / 2; for (let i = 0; i < count; i++) { const p = document.createElement('div'); p.className = 'particle'; p.textContent = '★'; p.style.fontSize = `${10 + Math.random() * 15}px`; p.style.left = `${startX}px`; p.style.top = `${startY}px`; const angle = Math.random() * 2 * Math.PI, dist = Math.random() * 40 + 20; const x = Math.cos(angle) * dist, y = Math.sin(angle) * dist; p.animate([ { transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 } ], { duration: 700 + Math.random() * 300, easing: 'ease-out' }); gameContainer.appendChild(p); setTimeout(() => p.remove(), 1000); } };
-        createFeverParticle = function() { const p = document.createElement('div'); p.className = 'particle'; p.textContent = '✨'; p.style.fontSize = `${15 + Math.random() * 15}px`; p.style.left = `${Math.random() * 100}%`; p.style.top = '105%'; p.animate([ { transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(-${gameContainer.clientHeight + 50}px)`, opacity: 0 } ], { duration: 2000 + Math.random() * 2000, easing: 'linear' }); gameContainer.appendChild(p); setTimeout(() => p.remove(), 4000); };
+        // --- Full bodies of other functions for completeness ---
+        function playSound(soundName) { /* Placeholder */ };
+        async function fetchUserHighScore() { if (!supabaseClient || !currentUser) { highScore = 0; highScoreDisplay.textContent = `High Score: 0`; return; } try { highScoreDisplay.textContent = 'Loading...'; const { data, error } = await supabaseClient.rpc('get_my_high_score', { p_telegram_id: currentUser.id }); if (error) throw error; highScore = data; highScoreDisplay.textContent = `High Score: ${highScore}`; } catch (error) { console.error('Error fetching high score via RPC:', error); highScore = 0; highScoreDisplay.textContent = 'Could not load score'; } };
+        async function fetchLeaderboard() { if (!supabaseClient) return; leaderboardList.innerHTML = '<li>Loading...</li>'; try { const { data, error } = await supabaseClient.rpc('get_leaderboard'); if (error) throw error; leaderboardList.innerHTML = ''; if (data.length === 0) { leaderboardList.innerHTML = '<li>Play to be the first!</li>'; } else { data.forEach((player, index) => { const li = document.createElement('li'); li.innerHTML = `<span>${index + 1}. ${player.username || 'Anon'}</span><span>${player.high_score}</span>`; leaderboardList.appendChild(li); }); } } catch (error) { console.error('Error fetching leaderboard:', error); leaderboardList.innerHTML = '<li>Could not load board</li>'; } };
+        async function saveGameResult() { if (!supabaseClient || !currentUser || score <= 0) return; try { const { error } = await supabaseClient.from('scores').insert({ telegram_id: currentUser.id, username: currentUser.username, high_score: score }); if (error) throw error; console.log(`Game result ${score} saved successfully!`); } catch (error) { console.error('Error saving game result:', error); } };
+        function startGame() { score = 0; combo = 1; lives = 3; hasShield = false; noteSpeed = 3.5; noteSpawnInterval = 1200; feverMeter = 0; isFeverTime = false; gameIsActive = true; updateUI(); startScreen.style.display = 'none'; document.querySelectorAll('.note, .particle').forEach(n => n.remove()); noteSpawner = setInterval(createNote, noteSpawnInterval); gameLoop(); };
+        function gameLoop() { if (!gameIsActive) return; updateKeyIndicators(); animationFrameId = requestAnimationFrame(gameLoop); };
+        async function endGame() { gameIsActive = false; clearInterval(noteSpawner); cancelAnimationFrame(animationFrameId); if (isFeverTime) endFeverTime(true); await saveGameResult(); if (score > highScore) { highScore = score; } startScreen.style.display = 'flex'; finalScoreDisplay.textContent = `Your final score: ${score}`; finalScoreDisplay.style.display = 'block'; startButton.textContent = 'Play Again'; highScoreDisplay.textContent = `High Score: ${highScore}`; fetchLeaderboard(); };
+        function getItem() { const rand = Math.random() * 100; if (isFeverTime) { if (rand < 80) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 95) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; return { ...items.special[0] }; } if (rand < 50) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 75) return { ...items.junk[Math.floor(Math.random()*items.junk.length)], type: 'junk' }; if (rand < 88) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; if (rand < 98) return { ...items.special[0] }; return { ...items.danger[0] }; };
+        function activatePowerup(type, targetElement) { let text = ''; switch(type) { case 'shield': text = 'SHIELD UP!'; hasShield = true; playSound('powerup'); break; case 'heart': if (lives < 5) { text = '+1 LIFE!'; lives++; playSound('powerup'); } break; } if (text) createFloatingText(text, targetElement, '#3498db'); updateUI(); };
+        function updateFeverMeter(amount) { if (isFeverTime) return; feverMeter = Math.min(FEVER_MAX, feverMeter + amount); if (feverMeter === FEVER_MAX) activateFeverTime(); updateUI(); };
+        function activateFeverTime() { isFeverTime = true; playSound('fever'); gameContainer.classList.add('fever-time'); feverParticleSpawner = setInterval(createFeverParticle, 150); feverBar.classList.add('depleting'); feverBar.style.width = '100%'; requestAnimationFrame(() => { feverBar.style.width = '0%'; }); setTimeout(endFeverTime, 10000); };
+        function endFeverTime(force = false) { if (!isFeverTime && !force) return; isFeverTime = false; feverMeter = 0; gameContainer.classList.remove('fever-time'); clearInterval(feverParticleSpawner); feverBar.classList.remove('depleting'); updateUI(); };
+        function updateKeyIndicators() { const hittableLanes = [false, false, false]; document.querySelectorAll('.note').forEach(note => { const laneIndex = parseInt(note.dataset.lane, 10); const targetLine = lanes[laneIndex].querySelector('.target-line'); const noteRect = note.getBoundingClientRect(); const targetRect = targetLine.getBoundingClientRect(); if (noteRect.bottom > targetRect.top && noteRect.top < targetRect.bottom) { hittableLanes[laneIndex] = true; } }); keyIndicators.forEach((indicator, index) => { indicator.classList.toggle('hittable', hittableLanes[index]); }); };
+        function updateUI() { scoreDisplay.textContent = `🏆 ${score}`; comboDisplay.textContent = `🔥 x${combo}`; livesDisplay.textContent = '❤️'.repeat(lives); shieldIcon.classList.toggle('active', hasShield); if (!isFeverTime) { feverBar.style.width = `${(feverMeter / FEVER_MAX) * 100}%`; } };
+        function createFloatingText(text, element, color) { const el = document.createElement('div'); el.className = 'floating-text'; el.textContent = text; el.style.color = color; const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect(); el.style.left = `${rect.left - containerRect.left + rect.width / 2}px`; el.style.top = `${rect.top - containerRect.top}px`; el.style.transform = 'translateX(-50%)'; gameContainer.appendChild(el); setTimeout(() => el.remove(), 1000); };
+        function createHitParticles(count, element) { const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect(); const startX = rect.left - containerRect.left + rect.width / 2; const startY = rect.top - containerRect.top + rect.height / 2; for (let i = 0; i < count; i++) { const p = document.createElement('div'); p.className = 'particle'; p.textContent = '★'; p.style.fontSize = `${10 + Math.random() * 15}px`; p.style.left = `${startX}px`; p.style.top = `${startY}px`; const angle = Math.random() * 2 * Math.PI, dist = Math.random() * 40 + 20; const x = Math.cos(angle) * dist, y = Math.sin(angle) * dist; p.animate([ { transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 } ], { duration: 700 + Math.random() * 300, easing: 'ease-out' }); gameContainer.appendChild(p); setTimeout(() => p.remove(), 1000); } };
+        function createFeverParticle() { const p = document.createElement('div'); p.className = 'particle'; p.textContent = '✨'; p.style.fontSize = `${15 + Math.random() * 15}px`; p.style.left = `${Math.random() * 100}%`; p.style.top = '105%'; p.animate([ { transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(-${gameContainer.clientHeight + 50}px)`, opacity: 0 } ], { duration: 2000 + Math.random() * 2000, easing: 'linear' }); gameContainer.appendChild(p); setTimeout(() => p.remove(), 4000); };
     </script>
 </body>
 </html>
