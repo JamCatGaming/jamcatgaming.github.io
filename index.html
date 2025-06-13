@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,74 +18,37 @@
             --danger-color: #FF6347; /* Tomato */
             --text-color: #333;
         }
-
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: var(--bg-color);
-            font-family: 'Arial', 'Helvetica Neue', sans-serif;
-            overflow: hidden;
-            user-select: none;
-        }
-
-        #game-container {
-            width: 100%;
-            max-width: 450px;
-            height: 100vh;
-            background-color: var(--container-bg);
-            border: 5px solid var(--primary-accent);
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            transition: box-shadow 0.5s ease, transform 0.1s;
-        }
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: var(--bg-color); font-family: 'Arial', 'Helvetica Neue', sans-serif; overflow: hidden; user-select: none; }
+        #game-container { width: 100%; max-width: 450px; height: 100vh; background-color: var(--container-bg); border: 5px solid var(--primary-accent); border-radius: 15px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: box-shadow 0.5s ease, transform 0.1s; }
         #game-container.fever-time { box-shadow: 0 0 30px var(--fever-glow); }
         #game-container.shake { animation: shake 0.3s; }
-        @keyframes shake {
-            10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); }
-            30%, 50%, 70% { transform: translateX(-4px); } 40%, 60% { transform: translateX(4px); }
-        }
-
+        @keyframes shake { 10%, 90% { transform: translateX(-1px); } 20%, 80% { transform: translateX(2px); } 30%, 50%, 70% { transform: translateX(-4px); } 40%, 60% { transform: translateX(4px); } }
         .lane-container { display: flex; width: 100%; height: 100%; }
-        .lane {
-            flex: 1; height: 100%; position: relative;
-            border-left: 2px dashed rgba(0,0,0,0.1); border-right: 2px dashed rgba(0,0,0,0.1);
-        }
-
+        .lane { flex: 1; height: 100%; position: relative; border-left: 2px dashed rgba(0,0,0,0.1); border-right: 2px dashed rgba(0,0,0,0.1); }
         #ui { position: absolute; top: 10px; left: 15px; right: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 24px; font-weight: bold; color: var(--text-color); z-index: 10; }
         #lives-container { display: flex; align-items: center; }
         #shield-icon { font-size: 28px; margin-left: 10px; opacity: 0; transition: opacity 0.3s; text-shadow: 0 0 10px #3498db; }
         #shield-icon.active { opacity: 1; }
-
         #cat { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 100px; z-index: 25; }
         #cat.happy { animation: head-bob 0.4s ease-in-out; }
         #cat.sad { animation: head-shake 0.4s ease-in-out; }
         @keyframes head-bob { 0%, 100% { transform: translateX(-50%) rotate(0deg); } 25% { transform: translateX(-50%) rotate(-10deg); } 75% { transform: translateX(-50%) rotate(10deg); } }
         @keyframes head-shake { 0%, 100% { transform: translateX(-50%); } 25% { transform: translateX(-55%) rotate(-5deg); } 75% { transform: translateX(-45%) rotate(5deg); } }
-
         .note { position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 60px; height: 60px; font-size: 50px; text-align: center; line-height: 60px; animation: fall linear; }
         @keyframes fall { from { top: -60px; } to { top: 100vh; } }
-
         .target-line { position: absolute; bottom: 120px; left: 0; width: 100%; height: 60px; background-color: rgba(0, 250, 154, 0.2); border-top: 3px solid var(--hit-zone-color); border-bottom: 3px solid var(--hit-zone-color); z-index: 5; transition: transform 0.1s; }
         .key-indicator { position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%); font-size: 40px; color: var(--primary-accent); opacity: 0.4; transition: all 0.1s ease-out; z-index: 6; }
         .key-indicator.hittable { opacity: 1; transform: translateX(-50%) scale(1.2); text-shadow: 0 0 10px white; }
         .key-indicator.pressed { transform: translateX(-50%) scale(0.9); transition-duration: 0.05s; }
-
         #fever-bar-container { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); width: 90%; height: 20px; background: rgba(0,0,0,0.2); border: 2px solid var(--primary-accent); border-radius: 10px; z-index: 20; overflow: hidden; }
         #fever-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #FFD700, #FFA500); transition: width 0.2s ease-out; }
         #fever-bar.depleting { background: linear-gradient(90deg, #FFFFFF, #FFD700); transition: width 10s linear !important; }
-
         #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 100; }
         #start-screen h1 { margin: 0; font-size: 3em; }
         #start-screen p { font-size: 1.2em; line-height: 1.5; max-width: 80%; }
         #high-score-display { font-size: 1.3em; color: var(--fever-glow); margin-top: 10px; }
         #start-button { padding: 15px 30px; font-size: 1.5em; border-radius: 10px; border: none; cursor: pointer; background-color: var(--danger-color); color: white; font-weight: bold; margin-top: 20px; transition: background-color 0.2s; }
         #start-button:hover { background-color: #e55337; }
-
         .floating-text, .particle { position: absolute; pointer-events: none; z-index: 30; }
         .floating-text { font-size: 22px; font-weight: bold; animation: float-up 1s ease-out forwards; }
         @keyframes float-up { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-60px); } }
@@ -95,6 +58,7 @@
 <body>
 
     <div id="game-container">
+        <!-- ... (вся разметка без изменений) ... -->
         <div class="lane-container">
             <div class="lane"> <div class="target-line"></div> <div class="key-indicator">⬅️</div></div>
             <div class="lane"> <div class="target-line"></div> <div class="key-indicator">⬇️</div></div>
@@ -117,22 +81,6 @@
     </div>
 
     <script>
-        // --- TELEGRAM & SUPABASE INTEGRATION ---
-        const tg = window.Telegram.WebApp;
-        // --> ВСТАВЬТЕ СВОИ ДАННЫЕ ИЗ SUPABASE СЮДА <--
-        const SUPABASE_URL = 'https://kefcmxtlllmatffumhyc.supabase.co'; // Например: 'https://xxxxxxxx.supabase.co'
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNteHRsbGxtYXRmZnVtaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NDQyMjYsImV4cCI6MjA1ODQyMDIyNn0.W22ul6CQOM4R4bp8x16bnK3NcdXkFKTP8K_Y6a1Bzdo'; // Длинный ключ anon public
-
-        let currentUser;
-	const { createClient } = supabase;
-
-        if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            console.error("Supabase credentials are not set!");
-            document.getElementById('high-score-display').textContent = 'Error: DB not configured.';
-        }
-
         // --- DOM Elements ---
         const gameContainer = document.getElementById('game-container');
         const lanes = document.querySelectorAll('.lane');
@@ -148,19 +96,132 @@
         const highScoreDisplay = document.getElementById('high-score-display');
         const keyIndicators = document.querySelectorAll('.key-indicator');
 
-        // --- Game State & Config ---
+        // --- Config & State Variables ---
+        const tg = window.Telegram.WebApp;
+        // --> ВСТАВЬТЕ СВОИ ДАННЫЕ ИЗ SUPABASE СЮДА <--
+       const SUPABASE_URL = 'https://kefcmxtlllmatffumhyc.supabase.co'; // Например: 'https://xxxxxxxx.supabase.co'
+       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNteHRsbGxtYXRmZnVtaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NDQyMjYsImV4cCI6MjA1ODQyMDIyNn0.W22ul6CQOM4R4bp8x16bnK3NcdXkFKTP8K_Y6a1Bzdo'; // Длинный ключ anon public
+
+        let supabaseClient; // Переименовал, чтобы не конфликтовать с глобальной переменной supabase
+        let currentUser;
+
         let score, combo, lives, hasShield, feverMeter, isFeverTime, highScore;
         let noteSpeed, noteSpawnInterval;
         let gameIsActive = false, noteSpawner = null, animationFrameId = null, feverParticleSpawner = null;
         const FEVER_MAX = 100, KEY_MAP = { 'ArrowLeft': 0, 'ArrowDown': 1, 'ArrowRight': 2 };
-        const items = {
-            food: [ {e: '🐟'}, {e: '🍗'}, {e: '🥩'} ],
-            junk: [ {e: '👢'}, {e: '🧱'}, {e: '🌵'} ],
-            powerup: [ {e: '🛡️', type: 'shield'}, {e: '❤️', type: 'heart'} ],
-            special: [ {e: '✨🐟', type: 'goldfish'} ]
-        };
+        const items = { food: [ {e: '🐟'}, {e: '🍗'}, {e: '🥩'} ], junk: [ {e: '👢'}, {e: '🧱'}, {e: '🌵'} ], powerup: [ {e: '🛡️', type: 'shield'}, {e: '❤️', type: 'heart'} ], special: [ {e: '✨🐟', type: 'goldfish'} ] };
 
-        // --- Game Flow & Main Loop ---
+        // --- Supabase Interaction ---
+        async function fetchUserHighScore() {
+            if (!supabaseClient || !currentUser) {
+                highScore = 0;
+                highScoreDisplay.textContent = `High Score: 0`;
+                return;
+            }
+
+            try {
+                highScoreDisplay.textContent = 'Loading score...';
+                let { data, error } = await supabaseClient
+                    .from('scores')
+                    .select('high_score')
+                    .eq('telegram_id', currentUser.id)
+                    .single();
+
+                if (error && error.code === 'PGRST116') { // Ошибка 'PGRST116' означает, что строка не найдена
+                    console.log('New user detected. Creating profile...');
+                    highScore = 0;
+
+                    const { error: insertError } = await supabaseClient.from('scores').insert({
+                        telegram_id: currentUser.id,
+                        username: currentUser.username,
+                        high_score: 0
+                    });
+
+                    if (insertError) throw insertError;
+
+                } else if (error) {
+                    throw error; // Выбрасываем любую другую ошибку
+                } else {
+                    highScore = data.high_score; // Пользователь найден, берем его счет
+                }
+
+                highScoreDisplay.textContent = `High Score: ${highScore}`;
+
+            } catch (error) {
+                console.error('Error during user initialization/fetching score:', error);
+                highScore = 0;
+                highScoreDisplay.textContent = 'Could not load score';
+            }
+        }
+
+        async function saveUserHighScore() {
+            if (!supabaseClient || !currentUser) return;
+            try {
+                // Upsert здесь по-прежнему идеален, так как он обновит существующую запись.
+                const { error } = await supabaseClient
+                    .from('scores')
+                    .upsert({
+                        telegram_id: currentUser.id,
+                        username: currentUser.username,
+                        high_score: highScore
+                    }, { onConflict: 'telegram_id' });
+                if (error) throw error;
+                console.log('High score saved successfully!');
+            } catch (error) {
+                console.error('Error saving high score:', error);
+            }
+        }
+
+        // --- EVENT LISTENERS AND INITIALIZATION ---
+        window.addEventListener('load', () => {
+            // Инициализируем Supabase, как вы и предложили
+            if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+                const { createClient } = supabase; // Деструктуризация из глобального объекта supabase
+                supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error("Supabase credentials are not set!");
+                document.getElementById('high-score-display').textContent = 'Error: DB not configured.';
+            }
+
+            // Вся остальная логика инициализации
+            tg.ready();
+            tg.expand();
+
+            currentUser = tg.initDataUnsafe?.user;
+
+            if (!currentUser) {
+                console.warn("Not running in Telegram. Using mock user for testing.");
+                currentUser = { id: 12345, username: 'testuser', first_name: 'Test' };
+                document.getElementById('start-screen').querySelector('p').innerHTML += '<br><b style="color:yellow;">Running in test mode.</b>';
+            }
+
+            fetchUserHighScore();
+        });
+
+        startButton.addEventListener('click', startGame);
+        document.addEventListener('keydown', handleKeyPress);
+
+        // --- (Остальные игровые функции без изменений) ---
+        // ... (весь код функций startGame, gameLoop, createNote, endGame и т.д. остается здесь) ...
+        async function endGame() {
+            gameIsActive = false;
+            clearInterval(noteSpawner);
+            cancelAnimationFrame(animationFrameId);
+            if (isFeverTime) endFeverTime(true);
+
+            if (score > highScore) {
+                highScore = score;
+                await saveUserHighScore();
+            }
+
+            startScreen.style.display = 'flex';
+            finalScoreDisplay.textContent = `Your final score: ${score}`;
+            finalScoreDisplay.style.display = 'block';
+            startButton.textContent = 'Play Again';
+            highScoreDisplay.textContent = `High Score: ${highScore}`;
+        }
+
+        // --- Копипаст неизмененных функций для полноты ---
         function startGame() {
             score = 0; combo = 1; lives = 3; hasShield = false;
             noteSpeed = 3.5; noteSpawnInterval = 1200;
@@ -171,13 +232,11 @@
             noteSpawner = setInterval(createNote, noteSpawnInterval);
             gameLoop();
         }
-
         function gameLoop() {
             if (!gameIsActive) return;
             updateKeyIndicators();
             animationFrameId = requestAnimationFrame(gameLoop);
         }
-
         function createNote() {
             if (!gameIsActive) return;
             const item = getItem();
@@ -191,130 +250,16 @@
             note.addEventListener('animationend', () => {
                 note.remove();
                 if (gameIsActive && (item.type === 'food' || item.type === 'goldfish')) {
-                    handleMiss(null); // Пропуск еды = промах
+                    handleMiss(null);
                 }
             });
             lanes[laneIndex].appendChild(note);
         }
-
-        async function endGame() {
-            gameIsActive = false;
-            clearInterval(noteSpawner);
-            cancelAnimationFrame(animationFrameId);
-            if (isFeverTime) endFeverTime(true);
-
-            if (score > highScore) {
-                highScore = score;
-                await saveUserHighScore(); // Сохраняем новый рекорд в Supabase
-            }
-
-            startScreen.style.display = 'flex';
-            finalScoreDisplay.textContent = `Your final score: ${score}`;
-            finalScoreDisplay.style.display = 'block';
-            startButton.textContent = 'Play Again';
-            highScoreDisplay.textContent = `High Score: ${highScore}`;
+        function getItem() {
+            if (isFeverTime) { const rand = Math.random(); if (rand < 0.8) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 0.95) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; return { ...items.special[0] }; }
+            const rand = Math.random() * 100; if (rand < 55) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 85) return { ...items.junk[Math.floor(Math.random()*items.junk.length)], type: 'junk' }; if (rand < 98) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; return { ...items.special[0] };
         }
-
-        // --- NEW: Functions for Supabase Interaction ---
-        async function fetchUserHighScore() {
-            if (!supabase || !currentUser) {
-                highScore = 0;
-                highScoreDisplay.textContent = `High Score: 0`;
-                return;
-            }
-            try {
-                highScoreDisplay.textContent = 'Loading score...';
-                const { data, error } = await supabase
-                    .from('scores')
-                    .select('high_score')
-                    .eq('telegram_id', currentUser.id)
-                    .single();
-
-                if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
-                    throw error;
-                }
-
-                highScore = data ? data.high_score : 0;
-                highScoreDisplay.textContent = `High Score: ${highScore}`;
-
-            } catch (error) {
-                console.error('Error fetching high score:', error);
-                highScore = 0;
-                highScoreDisplay.textContent = 'Could not load score';
-            }
-        }
-
-        async function saveUserHighScore() {
-            if (!supabase || !currentUser) return;
-            try {
-                const { error } = await supabase
-                    .from('scores')
-                    .upsert({
-                        telegram_id: currentUser.id,
-                        username: currentUser.username,
-                        high_score: highScore
-                    }, { onConflict: 'telegram_id' });
-
-                if (error) throw error;
-                console.log('High score saved successfully!');
-
-            } catch (error) {
-                console.error('Error saving high score:', error);
-            }
-        }
-
-        // --- Original Functions (mostly unchanged) ---
-        function getItem() { /* ... unchanged ... */ }
-        function handleKeyPress(e) { /* ... unchanged ... */ }
-        function handleHit(points, feverGain, targetElement) { /* ... unchanged ... */ }
-        function handleMiss(targetElement) { /* ... unchanged ... */ }
-        function activatePowerup(type, targetElement) { /* ... unchanged ... */ }
-        function updateFeverMeter(amount) { /* ... unchanged ... */ }
-        function activateFeverTime() { /* ... unchanged ... */ }
-        function endFeverTime(force = false) { /* ... unchanged ... */ }
-        function updateKeyIndicators() { /* ... unchanged ... */ }
-        function updateUI() { /* ... unchanged ... */ }
-        function createFloatingText(text, element, color) { /* ... unchanged ... */ }
-        function createHitParticles(count, element) { /* ... unchanged ... */ }
-        function createFeverParticle() { /* ... unchanged ... */ }
-
-        // --- Event Listeners ---
-        window.addEventListener('load', () => {
-            tg.ready(); // Сообщаем Telegram, что Web App готово
-            tg.expand(); // Раскрываем Web App на полный экран
-
-            // Получаем данные пользователя. Используем unsafe для простоты.
-            currentUser = tg.initDataUnsafe?.user;
-
-            if (!currentUser) {
-                // Если запускаем не из Telegram, создаем "фейкового" пользователя для тестов
-                console.warn("Not running in Telegram. Using mock user for testing.");
-                currentUser = { id: 12345, username: 'testuser', first_name: 'Test' };
-                document.getElementById('start-screen').querySelector('p').innerHTML += '<br><b style="color:yellow;">Running in test mode. Scores will not be saved correctly.</b>';
-            }
-
-            fetchUserHighScore();
-        });
-
-        startButton.addEventListener('click', startGame);
-        document.addEventListener('keydown', handleKeyPress);
-
-        // --- Copy-pasted original functions to keep the script complete ---
-        // (These functions are identical to your original code)
-        getItem = function() {
-            if (isFeverTime) {
-                const rand = Math.random();
-                if (rand < 0.8) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' };
-                if (rand < 0.95) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] };
-                return { ...items.special[0] };
-            }
-            const rand = Math.random() * 100;
-            if (rand < 55) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' };
-            if (rand < 85) return { ...items.junk[Math.floor(Math.random()*items.junk.length)], type: 'junk' };
-            if (rand < 98) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] };
-            return { ...items.special[0] };
-        }
-        handleKeyPress = function(e) {
+        function handleKeyPress(e) {
             if (!gameIsActive || !KEY_MAP.hasOwnProperty(e.key)) return;
             const laneIndex = KEY_MAP[e.key];
             const targetLine = lanes[laneIndex].querySelector('.target-line');
@@ -338,134 +283,75 @@
                 noteHit.remove();
             }
         }
-        handleHit = function(points, feverGain, targetElement) {
-            const scoreMultiplier = isFeverTime ? 3 : 1;
-            const finalPoints = points * combo * scoreMultiplier;
-            score += finalPoints; combo++;
+        function handleHit(points, feverGain, targetElement) {
+            const scoreMultiplier = isFeverTime ? 3 : 1; const finalPoints = points * combo * scoreMultiplier; score += finalPoints; combo++;
             if (!isFeverTime) updateFeverMeter(feverGain);
-            noteSpeed = Math.max(1.0, noteSpeed - 0.03);
-            cat.classList.remove('sad', 'happy'); void cat.offsetWidth; cat.classList.add('happy');
-            createFloatingText(`+${finalPoints}`, targetElement, '#27ae60');
-            createHitParticles(15, targetElement);
-            updateUI();
+            noteSpeed = Math.max(1.0, noteSpeed - 0.03); cat.classList.remove('sad', 'happy'); void cat.offsetWidth; cat.classList.add('happy');
+            createFloatingText(`+${finalPoints}`, targetElement, '#27ae60'); createHitParticles(15, targetElement); updateUI();
         }
-        handleMiss = function(targetElement) {
-            if (hasShield) {
-                hasShield = false; combo = Math.max(1, Math.floor(combo / 2));
-                createFloatingText('SHIELD USED!', targetElement || lanes[1].querySelector('.target-line'), '#3498db');
-                updateUI(); return;
-            }
-            lives--; combo = 1;
-            if (isFeverTime) endFeverTime();
+        function handleMiss(targetElement) {
+            if (hasShield) { hasShield = false; combo = Math.max(1, Math.floor(combo / 2)); createFloatingText('SHIELD USED!', targetElement || lanes[1].querySelector('.target-line'), '#3498db'); updateUI(); return; }
+            lives--; combo = 1; if (isFeverTime) endFeverTime();
             cat.classList.remove('happy', 'sad'); void cat.offsetWidth; cat.classList.add('sad');
-            gameContainer.classList.add('shake');
-            setTimeout(() => gameContainer.classList.remove('shake'), 300);
-            if (targetElement) {
-                createFloatingText('MISS', targetElement, '#e74c3c');
-            }
-            if (lives <= 0) endGame();
-            updateUI();
+            gameContainer.classList.add('shake'); setTimeout(() => gameContainer.classList.remove('shake'), 300);
+            if (targetElement) { createFloatingText('MISS', targetElement, '#e74c3c'); }
+            if (lives <= 0) endGame(); updateUI();
         }
-        activatePowerup = function(type, targetElement) {
-            let text = '';
-            switch(type) {
-                case 'shield': text = 'SHIELD UP!'; hasShield = true; break;
-                case 'heart': if (lives < 5) { text = '+1 LIFE!'; lives++; } break;
-            }
-            if (text) createFloatingText(text, targetElement, '#3498db');
-            updateUI();
+        function activatePowerup(type, targetElement) {
+            let text = ''; switch(type) { case 'shield': text = 'SHIELD UP!'; hasShield = true; break; case 'heart': if (lives < 5) { text = '+1 LIFE!'; lives++; } break; }
+            if (text) createFloatingText(text, targetElement, '#3498db'); updateUI();
         }
-        updateFeverMeter = function(amount) {
-            if (isFeverTime) return;
-            feverMeter = Math.min(FEVER_MAX, feverMeter + amount);
-            if (feverMeter === FEVER_MAX) activateFeverTime();
-            updateUI();
+        function updateFeverMeter(amount) {
+            if (isFeverTime) return; feverMeter = Math.min(FEVER_MAX, feverMeter + amount);
+            if (feverMeter === FEVER_MAX) activateFeverTime(); updateUI();
         }
-        activateFeverTime = function() {
-            isFeverTime = true;
-            gameContainer.classList.add('fever-time');
-            feverParticleSpawner = setInterval(createFeverParticle, 150);
-            feverBar.classList.add('depleting');
-            feverBar.style.width = '100%';
-            requestAnimationFrame(() => { feverBar.style.width = '0%'; });
+        function activateFeverTime() {
+            isFeverTime = true; gameContainer.classList.add('fever-time'); feverParticleSpawner = setInterval(createFeverParticle, 150);
+            feverBar.classList.add('depleting'); feverBar.style.width = '100%'; requestAnimationFrame(() => { feverBar.style.width = '0%'; });
             setTimeout(endFeverTime, 10000);
         }
-        endFeverTime = function(force = false) {
+        function endFeverTime(force = false) {
             if (!isFeverTime && !force) return;
-            isFeverTime = false; feverMeter = 0;
-            gameContainer.classList.remove('fever-time');
-            clearInterval(feverParticleSpawner);
-            feverBar.classList.remove('depleting');
-            updateUI();
+            isFeverTime = false; feverMeter = 0; gameContainer.classList.remove('fever-time');
+            clearInterval(feverParticleSpawner); feverBar.classList.remove('depleting'); updateUI();
         }
-        updateKeyIndicators = function() {
+        function updateKeyIndicators() {
             const hittableLanes = [false, false, false];
             document.querySelectorAll('.note').forEach(note => {
                 const laneIndex = parseInt(note.dataset.lane, 10);
                 const targetLine = lanes[laneIndex].querySelector('.target-line');
-                const noteRect = note.getBoundingClientRect();
-                const targetRect = targetLine.getBoundingClientRect();
-                if (noteRect.bottom > targetRect.top && noteRect.top < targetRect.bottom) {
-                    hittableLanes[laneIndex] = true;
-                }
+                const noteRect = note.getBoundingClientRect(); const targetRect = targetLine.getBoundingClientRect();
+                if (noteRect.bottom > targetRect.top && noteRect.top < targetRect.bottom) { hittableLanes[laneIndex] = true; }
             });
-            keyIndicators.forEach((indicator, index) => {
-                indicator.classList.toggle('hittable', hittableLanes[index]);
-            });
+            keyIndicators.forEach((indicator, index) => { indicator.classList.toggle('hittable', hittableLanes[index]); });
         }
-        updateUI = function() {
-            scoreDisplay.textContent = `🏆 ${score}`;
-            comboDisplay.textContent = `🔥 x${combo}`;
-            livesDisplay.textContent = '❤️'.repeat(lives);
-            shieldIcon.classList.toggle('active', hasShield);
-            if (!isFeverTime) {
-                feverBar.style.width = `${(feverMeter / FEVER_MAX) * 100}%`;
-            }
+        function updateUI() {
+            scoreDisplay.textContent = `🏆 ${score}`; comboDisplay.textContent = `🔥 x${combo}`;
+            livesDisplay.textContent = '❤️'.repeat(lives); shieldIcon.classList.toggle('active', hasShield);
+            if (!isFeverTime) { feverBar.style.width = `${(feverMeter / FEVER_MAX) * 100}%`; }
         }
-        createFloatingText = function(text, element, color) {
-            const el = document.createElement('div');
-            el.className = 'floating-text';
-            el.textContent = text;
-            el.style.color = color;
+        function createFloatingText(text, element, color) {
+            const el = document.createElement('div'); el.className = 'floating-text'; el.textContent = text; el.style.color = color;
             const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect();
-            el.style.left = `${rect.left - containerRect.left + rect.width / 2 - 30}px`;
-            el.style.top = `${rect.top - containerRect.top}px`;
-            gameContainer.appendChild(el);
-            setTimeout(() => el.remove(), 1000);
+            el.style.left = `${rect.left - containerRect.left + rect.width / 2 - 30}px`; el.style.top = `${rect.top - containerRect.top}px`;
+            gameContainer.appendChild(el); setTimeout(() => el.remove(), 1000);
         }
-        createHitParticles = function(count, element) {
+        function createHitParticles(count, element) {
             const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect();
-            const startX = rect.left - containerRect.left + rect.width / 2;
-            const startY = rect.top - containerRect.top + rect.height / 2;
+            const startX = rect.left - containerRect.left + rect.width / 2; const startY = rect.top - containerRect.top + rect.height / 2;
             for (let i = 0; i < count; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.textContent = '★';
-                p.style.fontSize = `${10 + Math.random() * 15}px`;
-                p.style.left = `${startX}px`; p.style.top = `${startY}px`;
-                const angle = Math.random() * 2 * Math.PI, dist = Math.random() * 40 + 20;
-                const x = Math.cos(angle) * dist, y = Math.sin(angle) * dist;
-                p.animate([
-                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-                    { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 }
-                ], { duration: 700 + Math.random() * 300, easing: 'ease-out' });
-                gameContainer.appendChild(p);
-                setTimeout(() => p.remove(), 1000);
+                const p = document.createElement('div'); p.className = 'particle'; p.textContent = '★';
+                p.style.fontSize = `${10 + Math.random() * 15}px`; p.style.left = `${startX}px`; p.style.top = `${startY}px`;
+                const angle = Math.random() * 2 * Math.PI, dist = Math.random() * 40 + 20; const x = Math.cos(angle) * dist, y = Math.sin(angle) * dist;
+                p.animate([ { transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 } ], { duration: 700 + Math.random() * 300, easing: 'ease-out' });
+                gameContainer.appendChild(p); setTimeout(() => p.remove(), 1000);
             }
         }
-        createFeverParticle = function() {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.textContent = '✨';
-            p.style.fontSize = `${15 + Math.random() * 15}px`;
-            p.style.left = `${Math.random() * 100}%`;
-            p.style.top = '105%';
-            p.animate([
-                { transform: 'translateY(0)', opacity: 1 },
-                { transform: `translateY(-${gameContainer.clientHeight + 50}px)`, opacity: 0 }
-            ], { duration: 2000 + Math.random() * 2000, easing: 'linear' });
-            gameContainer.appendChild(p);
-            setTimeout(() => p.remove(), 4000);
+        function createFeverParticle() {
+            const p = document.createElement('div'); p.className = 'particle'; p.textContent = '✨'; p.style.fontSize = `${15 + Math.random() * 15}px`;
+            p.style.left = `${Math.random() * 100}%`; p.style.top = '105%';
+            p.animate([ { transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(-${gameContainer.clientHeight + 50}px)`, opacity: 0 } ], { duration: 2000 + Math.random() * 2000, easing: 'linear' });
+            gameContainer.appendChild(p); setTimeout(() => p.remove(), 4000);
         }
     </script>
 </body>
