@@ -189,6 +189,8 @@
             if (!currentUser) {
                 currentUser = { id: 12345, username: 'testuser' };
                 document.getElementById('start-screen').querySelector('p').innerHTML += '<br><b style="color:yellow;">Running in test mode.</b>';
+            } else if (currentUser && currentUser.username) {
+                document.getElementById('start-screen').querySelector('p').innerHTML += (`<br><b style="color:yellow;">Welcome, ` + currentUser.username + `!</b>`);
             }
             fetchUserHighScore();
         });
