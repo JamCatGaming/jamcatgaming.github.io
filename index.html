@@ -98,11 +98,48 @@
         const KEY_MAP = { 'ArrowLeft': 0, 'ArrowDown': 1, 'ArrowRight': 2 };
         const items = { food: [{e: '🐟'}, {e: '🍗'}, {e: '🥩'}], junk: [{e: '👢'}, {e: '🧱'}, {e: '🌵'}], powerup: [{e: '🛡️', type: 'shield'}, {e: '❤️', type: 'heart'}], special: [{e: '✨🐟', type: 'goldfish'}], danger: [{e: '💣', type: 'bomb'}] };
 
+        // --- Game Flow ---
+        function startGame() {
+            score = 0; combo = 1; lives = 3; hasShield = false;
+            noteSpeed = 3.5; noteSpawnInterval = 1200;
+            feverMeter = 0; isFeverTime = false;
+            gameIsActive = true;
+            updateUI();
+            startScreen.style.display = 'none';
+            document.querySelectorAll('.note, .particle').forEach(n => n.remove());
+            // ИСПРАВЛЕНО: Добавляем обработчик тапов ПРИ СТАРТЕ игры
+            gameContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+            noteSpawner = setInterval(createNote, noteSpawnInterval);
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if (!gameIsActive) return;
+            updateKeyIndicators();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        async function endGame() {
+            gameIsActive = false;
+            // ИСПРАВЛЕНО: Удаляем обработчик тапов ПРИ ОКОНЧАНИИ игры
+            gameContainer.removeEventListener('touchstart', handleTouchStart);
+            clearInterval(noteSpawner);
+            cancelAnimationFrame(animationFrameId);
+            if (isFeverTime) endFeverTime(true);
+            await saveGameResult();
+            if (score > highScore) {
+                highScore = score;
+            }
+            startScreen.style.display = 'flex';
+            finalScoreDisplay.textContent = `Your final score: ${score}`;
+            finalScoreDisplay.style.display = 'block';
+            startButton.textContent = 'Play Again';
+            highScoreDisplay.textContent = `High Score: ${highScore}`;
+            fetchLeaderboard();
+        }
+
         // --- Player Actions & Consequences ---
-        function handleKeyPress(e) {
-            if (!gameIsActive || !KEY_MAP.hasOwnProperty(e.key)) return;
-            
-            const laneIndex = KEY_MAP[e.key];
+        function performHit(laneIndex) {
             const targetLine = lanes[laneIndex].querySelector('.target-line');
             const targetRect = targetLine.getBoundingClientRect();
             
@@ -151,12 +188,14 @@
             }
         }
 
-        // NEW: Function to handle touch events
+        function handleKeyPress(e) {
+            if (!gameIsActive || !KEY_MAP.hasOwnProperty(e.key)) return;
+            performHit(KEY_MAP[e.key]);
+        }
+        
         function handleTouchStart(e) {
-            e.preventDefault(); // Prevents zoom/scroll on mobile
-            if (!gameIsActive)  {
-                return startGame();
-            };
+            e.preventDefault(); 
+            if (!gameIsActive) return;
 
             const touch = e.touches[0];
             const tappedElement = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -166,10 +205,7 @@
             if (tappedLane) {
                 const laneIndex = Array.from(lanes).indexOf(tappedLane);
                 if (laneIndex !== -1) {
-                    const key = Object.keys(KEY_MAP).find(k => KEY_MAP[k] === laneIndex);
-                    if (key) {
-                        handleKeyPress({ key: key });
-                    }
+                    performHit(laneIndex);
                 }
             }
         }
@@ -203,7 +239,7 @@
         function handleMiss(targetElement) {
             if (hasShield) {
                 hasShield = false;
-                combo = 1; // Shield saves you but resets combo
+                combo = 1;
                 createFloatingText('SHIELD SAVED!', targetElement || lanes[1].querySelector('.target-line'), '#3498db');
                 playSound('shield');
                 updateUI();
@@ -223,7 +259,7 @@
             updateUI();
 
             if (lives <= 0) {
-                gameIsActive = false;
+                gameIsActive = false; // Немедленно останавливаем игру
                 setTimeout(endGame, 500);
             }
         }
@@ -243,14 +279,14 @@
                 if (gameIsActive) {
                     const isGoodNote = ['food', 'goldfish', 'shield', 'heart'].includes(item.type);
                     if (isGoodNote) {
-                        handleMiss(null); // Пропуск хорошей ноты = промах
+                        handleMiss(null);
                     }
                 }
             });
             lanes[laneIndex].appendChild(note);
         }
 
-        // --- Initialization and other functions ---
+        // --- Initialization and Event Listeners ---
         window.addEventListener('load', () => {
             if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
                 const { createClient } = supabase;
@@ -270,17 +306,12 @@
 
         startButton.addEventListener('click', startGame);
         document.addEventListener('keydown', handleKeyPress);
-        // NEW: Add touch listener
-        gameContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
-
+        
         // --- Full bodies of other functions for completeness ---
         function playSound(soundName) { /* Placeholder */ };
         async function fetchUserHighScore() { if (!supabaseClient || !currentUser) { highScore = 0; highScoreDisplay.textContent = `High Score: 0`; return; } try { highScoreDisplay.textContent = 'Loading...'; const { data, error } = await supabaseClient.rpc('get_my_high_score', { p_telegram_id: currentUser.id }); if (error) throw error; highScore = data; highScoreDisplay.textContent = `High Score: ${highScore}`; } catch (error) { console.error('Error fetching high score via RPC:', error); highScore = 0; highScoreDisplay.textContent = 'Could not load score'; } };
         async function fetchLeaderboard() { if (!supabaseClient) return; leaderboardList.innerHTML = '<li>Loading...</li>'; try { const { data, error } = await supabaseClient.rpc('get_leaderboard'); if (error) throw error; leaderboardList.innerHTML = ''; if (data.length === 0) { leaderboardList.innerHTML = '<li>Play to be the first!</li>'; } else { data.forEach((player, index) => { const li = document.createElement('li'); li.innerHTML = `<span>${index + 1}. ${player.username || 'Anon'}</span><span>${player.high_score}</span>`; leaderboardList.appendChild(li); }); } } catch (error) { console.error('Error fetching leaderboard:', error); leaderboardList.innerHTML = '<li>Could not load board</li>'; } };
         async function saveGameResult() { if (!supabaseClient || !currentUser || score <= 0) return; try { const { error } = await supabaseClient.from('scores').insert({ telegram_id: currentUser.id, username: currentUser.username, high_score: score }); if (error) throw error; console.log(`Game result ${score} saved successfully!`); } catch (error) { console.error('Error saving game result:', error); } };
-        function startGame() { score = 0; combo = 1; lives = 3; hasShield = false; noteSpeed = 3.5; noteSpawnInterval = 1200; feverMeter = 0; isFeverTime = false; gameIsActive = true; updateUI(); startScreen.style.display = 'none'; document.querySelectorAll('.note, .particle').forEach(n => n.remove()); noteSpawner = setInterval(createNote, noteSpawnInterval); gameLoop(); };
-        function gameLoop() { if (!gameIsActive) return; updateKeyIndicators(); animationFrameId = requestAnimationFrame(gameLoop); };
-        async function endGame() { gameIsActive = false; clearInterval(noteSpawner); cancelAnimationFrame(animationFrameId); if (isFeverTime) endFeverTime(true); await saveGameResult(); if (score > highScore) { highScore = score; } startScreen.style.display = 'flex'; finalScoreDisplay.textContent = `Your final score: ${score}`; finalScoreDisplay.style.display = 'block'; startButton.textContent = 'Play Again'; highScoreDisplay.textContent = `High Score: ${highScore}`; fetchLeaderboard(); };
         function getItem() { const rand = Math.random() * 100; if (isFeverTime) { if (rand < 80) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 95) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; return { ...items.special[0] }; } if (rand < 50) return { ...items.food[Math.floor(Math.random()*items.food.length)], type: 'food' }; if (rand < 75) return { ...items.junk[Math.floor(Math.random()*items.junk.length)], type: 'junk' }; if (rand < 88) return { ...items.powerup[Math.floor(Math.random()*items.powerup.length)] }; if (rand < 98) return { ...items.special[0] }; return { ...items.danger[0] }; };
         function activatePowerup(type, targetElement) { let text = ''; switch(type) { case 'shield': text = 'SHIELD UP!'; hasShield = true; playSound('powerup'); break; case 'heart': if (lives < 5) { text = '+1 LIFE!'; lives++; playSound('powerup'); } break; } if (text) createFloatingText(text, targetElement, '#3498db'); updateUI(); };
         function updateFeverMeter(amount) { if (isFeverTime) return; feverMeter = Math.min(FEVER_MAX, feverMeter + amount); if (feverMeter === FEVER_MAX) activateFeverTime(); updateUI(); };
@@ -288,7 +319,7 @@
         function endFeverTime(force = false) { if (!isFeverTime && !force) return; isFeverTime = false; feverMeter = 0; gameContainer.classList.remove('fever-time'); clearInterval(feverParticleSpawner); feverBar.classList.remove('depleting'); updateUI(); };
         function updateKeyIndicators() { const hittableLanes = [false, false, false]; document.querySelectorAll('.note').forEach(note => { const laneIndex = parseInt(note.dataset.lane, 10); const targetLine = lanes[laneIndex].querySelector('.target-line'); const noteRect = note.getBoundingClientRect(); const targetRect = targetLine.getBoundingClientRect(); if (noteRect.bottom > targetRect.top && noteRect.top < targetRect.bottom) { hittableLanes[laneIndex] = true; } }); keyIndicators.forEach((indicator, index) => { indicator.classList.toggle('hittable', hittableLanes[index]); }); };
         function updateUI() { scoreDisplay.textContent = `🏆 ${score}`; comboDisplay.textContent = `🔥 x${combo}`; livesDisplay.textContent = '❤️'.repeat(lives); shieldIcon.classList.toggle('active', hasShield); if (!isFeverTime) { feverBar.style.width = `${(feverMeter / FEVER_MAX) * 100}%`; } };
-        function createFloatingText(text, element, color) { const el = document.createElement('div'); el.className = 'floating-text'; el.textContent = text; el.style.color = color; const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect(); el.style.left = `${rect.left - containerRect.left + rect.width / 2}px`; el.style.top = `${rect.top - containerRect.top}px`; el.style.transform = 'translateX(-50%)'; gameContainer.appendChild(el); setTimeout(() => el.remove(), 1000); };
+        function createFloatingText(text, element, color) { const el = document.createElement('div'); el.className = 'floating-text'; el.innerHTML = text.replace('\n', '<br>'); el.style.color = color; const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect(); el.style.left = `${rect.left - containerRect.left + rect.width / 2}px`; el.style.top = `${rect.top - containerRect.top}px`; el.style.transform = 'translateX(-50%)'; gameContainer.appendChild(el); setTimeout(() => el.remove(), 1000); };
         function createHitParticles(count, element) { const rect = element.getBoundingClientRect(), containerRect = gameContainer.getBoundingClientRect(); const startX = rect.left - containerRect.left + rect.width / 2; const startY = rect.top - containerRect.top + rect.height / 2; for (let i = 0; i < count; i++) { const p = document.createElement('div'); p.className = 'particle'; p.textContent = '★'; p.style.fontSize = `${10 + Math.random() * 15}px`; p.style.left = `${startX}px`; p.style.top = `${startY}px`; const angle = Math.random() * 2 * Math.PI, dist = Math.random() * 40 + 20; const x = Math.cos(angle) * dist, y = Math.sin(angle) * dist; p.animate([ { transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${x}px, ${y}px) scale(0)`, opacity: 0 } ], { duration: 700 + Math.random() * 300, easing: 'ease-out' }); gameContainer.appendChild(p); setTimeout(() => p.remove(), 1000); } };
         function createFeverParticle() { const p = document.createElement('div'); p.className = 'particle'; p.textContent = '✨'; p.style.fontSize = `${15 + Math.random() * 15}px`; p.style.left = `${Math.random() * 100}%`; p.style.top = '105%'; p.animate([ { transform: 'translateY(0)', opacity: 1 }, { transform: `translateY(-${gameContainer.clientHeight + 50}px)`, opacity: 0 } ], { duration: 2000 + Math.random() * 2000, easing: 'linear' }); gameContainer.appendChild(p); setTimeout(() => p.remove(), 4000); };
     </script>
