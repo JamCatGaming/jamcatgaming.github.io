@@ -100,6 +100,7 @@
         // --> ВСТАВЬТЕ СВОИ ДАННЫЕ ИЗ SUPABASE СЮДА <--
        const SUPABASE_URL = 'https://kefcmxtlllmatffumhyc.supabase.co'; // Например: 'https://xxxxxxxx.supabase.co'
        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmNteHRsbGxtYXRmZnVtaHljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NDQyMjYsImV4cCI6MjA1ODQyMDIyNn0.W22ul6CQOM4R4bp8x16bnK3NcdXkFKTP8K_Y6a1Bzdo'; // Длинный ключ anon public
+
         
         let supabaseClient;
         let currentUser;
@@ -118,20 +119,19 @@
             }
             try {
                 highScoreDisplay.textContent = 'Loading score...';
-                const { data, error } = await supabaseClient
-                    .from('scores')
-                    .select('high_score')
-                    .eq('telegram_id', currentUser.id);
+                
+                // Вызываем нашу новую RPC-функцию!
+                const { data, error } = await supabaseClient.rpc('get_my_high_score', {
+                    p_telegram_id: currentUser.id
+                });
 
                 if (error) throw error;
-                if (data && data.length > 0) {
-                    highScore = Math.max(...data.map(item => item.high_score));
-                } else {
-                    highScore = 0;
-                }
+                
+                highScore = data;
                 highScoreDisplay.textContent = `High Score: ${highScore}`;
+
             } catch (error) {
-                console.error('Error fetching high score:', error);
+                console.error('Error fetching high score via RPC:', error);
                 highScore = 0;
                 highScoreDisplay.textContent = 'Could not load score';
             }
@@ -189,8 +189,6 @@
             if (!currentUser) {
                 currentUser = { id: 12345, username: 'testuser' };
                 document.getElementById('start-screen').querySelector('p').innerHTML += '<br><b style="color:yellow;">Running in test mode.</b>';
-            } else if (currentUser && currentUser.username) {
-                document.getElementById('start-screen').querySelector('p').innerHTML += (`<br><b style="color:yellow;">Welcome, ` + currentUser.username + `!</b>`);
             }
             fetchUserHighScore();
         });
